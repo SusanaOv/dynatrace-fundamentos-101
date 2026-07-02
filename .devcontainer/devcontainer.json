@@ -1,0 +1,21 @@
+{
+  "name": "Dynatrace Fundamentos Lab",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "forwardPorts": [8080, 8081, 5432, 6379, 9080],
+  "portsAttributes": {
+    "8080": { "label": "Demo Web", "onAutoForward": "notify" },
+    "8081": { "label": "Demo API", "onAutoForward": "notify" },
+    "9080": { "label": "Kind ingress (M05)", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "chmod +x scripts/*.sh && cp --update=none infra/.env.example infra/.env 2>/dev/null || true",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools"
+      ]
+    }
+  }
+}

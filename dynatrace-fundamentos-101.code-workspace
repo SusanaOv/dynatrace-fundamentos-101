@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "name": "dynatrace-fundamentos-101",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true
+    }
+  }
+}

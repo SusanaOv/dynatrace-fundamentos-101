@@ -1,0 +1,33 @@
+---
+description: Contexto del curso Dynatrace Fundamentos — leer antes de editar
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Curso Dynatrace Fundamentos
+
+## Workspace correcto
+
+Trabaja en **`dynatrace-fundamentos-101`** (`/home/david/Cursos/dynatrace-fundamentos-101`), **no** en `/home/david/Cursos/template`.
+
+## Memoria del bootstrap
+
+Lee **`.agent/HILO-INICIAL.md`** (temario, decisiones, backlog) y luego `.agent/diseno/contexto.md`, `.agent/SEED.md`.
+
+## Repo
+
+- Local: `/home/david/Cursos/dynatrace-fundamentos-101`
+- GitHub: `my-it-labs/dynatrace-fundamentos-101`
+
+## Hechos cerrados (no renegociar sin pedir)
+
+- Entrega alumno: fork + **Codespaces** + repo público (sin PDF).
+- Dynatrace: **SaaS trial** externo; **no** Dynatrace Managed por alumno.
+- Infra lab: `infra/docker-compose.yml` (M01–M04), **kind** + Operator (M05).
+- Diseño docente solo en `.agent/diseno/` — no horas/calendario en `labs/`.
+- Iteración: formador hace el curso como alumno para afinar guiones.
+
+## Norma
+
+Tras montar o crear el curso, el agente y el autor deben operar **solo** en este workspace, no en el template.
