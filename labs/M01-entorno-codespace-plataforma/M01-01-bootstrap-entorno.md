@@ -2,69 +2,254 @@
 
 [← Página anterior](README.md) · [Siguiente página →](M01-02-navegacion-ui.md)
 
-> Práctica del módulo. La teoría y la demo están en el [README del módulo](README.md).
+> Práctica del módulo. La teoría está en el [README del módulo](README.md).
+> **¿Primera vez con Dynatrace?** Haz primero el paso **2** (tenant + tokens) aunque el Codespace
+> aún no esté listo.
 
 ### Objetivo
 
-Dejar operativo tu fork, Codespace, tenant Dynatrace y stack Docker del curso.
+Dejar operativo tu fork, Codespace, tenant Dynatrace (URL + tokens en `.env`) y stack Docker del curso.
 
 ### Prerrequisitos
 
 - Cuenta GitHub.
-- Tenant Dynatrace SaaS (trial gratuito).
+- Navegador (para crear el trial y copiar tokens).
 
 ### En qué consiste
 
-Fork del repo, arranque del Codespace, configuración de `infra/.env`, despliegue de Compose y validación con `health-check.sh`.
+Fork → Codespace → **crear tenant y tokens con calma** → rellenar `infra/.env` → levantar Compose →
+validar con `health-check.sh`.
+
+---
 
 ### 1 — Fork y Codespace
 
 **Acción:** Haz fork de `my-it-labs/dynatrace-fundamentos-101`, abre **Code → Codespaces → Create codespace on main**.
+
 **Por qué:** Cada alumno trabaja en su copia y conserva el material al finalizar.
+
 **Resultado esperado:** Terminal en `/workspaces/dynatrace-fundamentos-101` (o nombre de tu fork).
 
-### 2 — Tenant y tokens
+---
 
-**Acción:** Crea o accede a tu tenant en [dynatrace.com/signup](https://www.dynatrace.com/signup/). Genera y guarda:
+### 2 — Tenant Dynatrace (trial)
 
-| Token | Cuándo lo usas |
-|-------|----------------|
-| **PaaS** | **M03** — instalar OneAgent (`ONEAGENT_PAAS_TOKEN`) |
-| **Operator** + **Ingest** | **M05** — Kubernetes (app Kubernetes → Add cluster) |
+**Acción:**
 
-**Por qué:** M01 solo prepara el tenant; no hace falta desplegar OneAgent todavía.
-**Resultado esperado:** URL tipo `https://<env-id>.live.dynatrace.com` y tokens en gestor seguro (no en el chat ni en git).
+1. Abre [dynatrace.com/signup](https://www.dynatrace.com/signup/) y crea el trial (email + verificación).
+2. Tras el registro, Dynatrace te lleva a tu **tenant** (interfaz web).
+3. Mira la **barra de direcciones** del navegador. Anota:
 
-### 3 — Configurar `.env`
+| Qué anotar | Ejemplo | Variable `.env` |
+|------------|---------|---------------|
+| **URL del tenant** | `https://xpn34545.apps.dynatrace.com` | `DYNATRACE_ENVIRONMENT_URL` |
+| **Environment ID** | `xpn34545` (prefijo antes de `.live` o `.apps`) | `DYNATRACE_ENVIRONMENT_ID` |
 
-**Acción:** En el Codespace, edita `infra/.env` (copiado desde `.env.example`) con `DYNATRACE_ENVIRONMENT_URL`, tokens e `DYNATRACE_ENVIRONMENT_ID`.
-**Por qué:** Los scripts y módulos posteriores leen esta configuración.
-**Resultado esperado:** `source infra/.env && echo $DYNATRACE_ENVIRONMENT_URL` muestra tu URL.
+**Qué es esto:** El **tenant** es tu cuenta cloud. El **environment ID** es el identificador corto del
+entorno de prácticas dentro de ese tenant.
+
+**Por qué:** Los scripts del curso llaman a la API de **esa** URL; un carácter mal puesto falla en M03.
+
+**Resultado esperado:**
+
+- Puedes iniciar sesión y ves el **Launcher** (Getting started).
+- Tienes copiados URL e ID en un gestor de contraseñas o borrador **local** (no en git, no en el chat).
+
+> [!WARNING]
+> **Formato correcto de URL**
+> - ✅ `https://<id>.live.dynatrace.com` o `https://<id>.apps.dynatrace.com`
+> - ❌ `https://<id>.apps.dynatrace.com/ui/apps/...` (eso es una **página**, no la URL base)
+> - ❌ Barra final `/` al end
+
+---
+
+### 2b — Qué tokens necesitas (mapa del curso)
+
+Un **token** es una contraseña larga que permite a scripts/agentes hablar con tu tenant **sin** usar tu
+usuario/contraseña de login.
+
+| Variable en `infra/.env` | Para qué sirve | ¿Cuándo lo usas? |
+|--------------------------|----------------|------------------|
+| `ONEAGENT_PAAS_TOKEN` | Instalar **OneAgent** en Docker | **M03** |
+| `DYNATRACE_API_TOKEN` | **Operator** / API plataforma | **M05** |
+| `DYNATRACE_INGEST_TOKEN` | Enviar **métricas, logs y trazas** (Grail) | **M05** |
+
+**En M01-01 genera los tres ya** y guárdalos en `.env`. Así no interrumpes el curso en M03/M05.
+**Nadie los usa** hasta esos módulos, pero crear tokens requiere entender la UI — mejor hacerlo ahora.
+
+> [!IMPORTANT]
+> Cada token se muestra **completo una sola vez** al crearlo. Si lo pierdes, **genera otro** y
+> actualiza `.env`.
+
+---
+
+### 2c — Llegar a «Access tokens» (ruta común)
+
+**Acción** (elige una):
+
+**Opción A — Búsqueda global (recomendada)**
+
+1. <kbd>Ctrl</kbd>+<kbd>K</kbd> → escribe `Access tokens`.
+2. Abre el resultado **Access tokens** bajo **Settings** (no confundir con «Personal Access Tokens» del
+   usuario si solo quieres tokens de plataforma).
+
+**Opción B — Menú Settings**
+
+1. Abre la app **Settings** (dock o Launcher → Manage Dynatrace).
+2. En el panel izquierdo: **Environment segmentation** → **Access control** → **Access tokens**.
+
+**Resultado esperado:** Página **Access tokens** con botón tipo **Generate token** / **Create token**.
+
+![Settings → Access tokens](../img/M01-01-access-tokens.png)
+
+---
+
+### 2d — Crear `ONEAGENT_PAAS_TOKEN` (OneAgent / M03)
+
+**Acción:**
+
+1. En **Access tokens**, pulsa **Generate token** (o equivalente).
+2. **Nombre sugerido:** `curso-oneagent-paas`
+3. **Tipo / template:** elige **PaaS** (a veces aparece como tipo de instalación PaaS / OneAgent en
+   contenedores). Si la UI ofrece plantillas, selecciona la relacionada con **OneAgent** o **PaaS**.
+4. **Scopes / permisos:** acepta los que la plantilla PaaS marca por defecto (instalación de OneAgent).
+5. Confirma y **copia el token** inmediatamente a tu gestor seguro.
+
+**Qué es esto:** Autoriza al contenedor `dynatrace/oneagent` del curso a **descargar e instalar**
+OneAgent en tu Codespace.
+
+**Por qué:** Sin PaaS token, `scripts/oneagent-up.sh` falla en M03 aunque Docker esté bien.
+
+**Resultado esperado:** Cadena larga (decenas de caracteres) guardada; pegarás en `.env` en el paso 3.
+
+**Alternativa guiada:** Launcher → tarjeta **OneAgent** → **Set up** → **Linux** / **Docker** — el
+asistente también muestra cómo generar el token PaaS (mismo valor).
+
+---
+
+### 2e — Crear `DYNATRACE_API_TOKEN` y `DYNATRACE_INGEST_TOKEN` (Operator / M05)
+
+Tienes **dos caminos**. Usa **A** si prefieres que Dynatrace marque los scopes; **B** si quieres control manual.
+
+#### Opción A — Asistente Kubernetes (recomendado para principiantes)
+
+**Acción:**
+
+1. Abre la app **Kubernetes** (dock o búsqueda global).
+2. Pulsa **Add cluster** (botón morado en Overview).
+3. Elige distribución **Other** / **Other provider** (no hace falta tener el clúster creado todavía).
+4. Sigue el asistente hasta la pantalla donde muestra **tokens** (API + ingest / data ingest).
+5. **Copia ambos tokens** por separado antes de cerrar el asistente.
+
+![Kubernetes — Add cluster (asistente de tokens)](../img/M01-01-kubernetes-add-cluster.png)
+
+**Qué es cada uno:**
+
+| Token del asistente | Variable `.env` |
+|---------------------|-----------------|
+| API / Platform | `DYNATRACE_API_TOKEN` |
+| Data ingest / Ingest | `DYNATRACE_INGEST_TOKEN` |
+
+**Por qué:** El asistente crea tokens con scopes correctos para **Dynatrace Operator** y **Grail ingest**.
+
+**Resultado esperado:** Dos tokens distintos guardados (no uses el PaaS de 2d en su lugar).
+
+#### Opción B — Manual en Access tokens
+
+**Acción:** Genera **dos** tokens en **Access tokens**:
+
+1. **`curso-operator-api`** — tipo **API** con scopes mínimos:
+   - `ReadConfig`
+   - `WriteConfig`
+   - (si la UI lo ofrece) `ReadSettings`, `WriteSettings`
+2. **`curso-ingest`** — tipo **Ingest** / API con scopes:
+   - `metrics.ingest`
+   - `logs.ingest`
+   - `openTelemetryTrace.ingest`
+
+**Resultado esperado:** Dos tokens distintos asignados a `DYNATRACE_API_TOKEN` y `DYNATRACE_INGEST_TOKEN`.
+
+> [!TIP]
+> Si solo ves un tipo «API» genérico, crea **dos tokens API** con scopes distintos (lista de arriba).
+> Lo crítico es **no mezclar** PaaS con API/Ingest.
+
+---
+
+### 3 — Configurar `infra/.env`
+
+**Acción:** En el Codespace (o localmente):
+
+```bash
+cp infra/.env.example infra/.env
+nano infra/.env   # o el editor que prefieras
+```
+
+Rellena **como mínimo** (con tus valores reales):
+
+```bash
+DYNATRACE_ENVIRONMENT_URL=https://<TU-ID>.apps.dynatrace.com
+DYNATRACE_ENVIRONMENT_ID=<TU-ID>
+ONEAGENT_PAAS_TOKEN=dt0c01.xxxxx
+DYNATRACE_API_TOKEN=dt0c01.xxxxx
+DYNATRACE_INGEST_TOKEN=dt0c01.xxxxx
+```
+
+**Por qué:** Los scripts leen este fichero; `.env` está en `.gitignore` para no filtrar secretos.
+
+**Resultado esperado:**
+
+```bash
+source infra/.env
+echo "$DYNATRACE_ENVIRONMENT_URL"
+echo "${ONEAGENT_PAAS_TOKEN:0:8}..."   # solo prefijo, no pegues el token en el chat
+```
+
+→ Muestra tu URL y un prefijo del token (comprueba que no está vacío).
+
+---
 
 ### 4 — Levantar el lab
 
-**Acción:** Ejecuta `./scripts/lab-up.sh` desde la raíz del repo.
-**Por qué:** Despliega demo-web, demo-api, Postgres, Redis y loadgen.
-**Resultado esperado:** `./scripts/health-check.sh` reporta `demo-web :8080 OK` y `demo-api :8081 OK`.
+**Acción:** Desde la raíz del repo:
+
+```bash
+./scripts/lab-up.sh
+./scripts/health-check.sh
+```
+
+**Por qué:** Despliega demo-web, demo-api, Postgres, Redis y loadgen. **Aún no** envían datos a Dynatrace
+(hasta M03).
+
+**Resultado esperado:** `demo-web :8080 OK` y `demo-api :8081 OK`.
+
+---
 
 ## Comprueba tu entendimiento
 
 **Stack en marcha**
-Ejecuta `docker compose -f infra/docker-compose.yml ps` y verifica que los cinco servicios están `running`.
-→ Cinco contenedores activos sin reinicios en bucle.
+Ejecuta `docker compose -f infra/docker-compose.yml ps`.
+→ Cinco servicios `running` sin reinicios en bucle.
+
+**Tokens preparados**
+Abre `infra/.env` y verifica que **URL, ID y tres tokens** no están vacíos.
+→ Listo para M03 y M05 sin volver a la UI (salvo regenerar un token revocado).
+
+---
 
 ## Reto
 
 ### 1 — Identifica tu entorno
 
-Anota (para ti) el ID de environment Dynatrace y la URL pública del puerto 8080 que Codespaces reenvía al demo-web.
+Anota (para ti) el environment ID y la URL pública del puerto **8080** que Codespaces reenvía al demo-web.
 
 <details>
 <summary>Ver orientación</summary>
 
-El environment ID es el prefijo de la URL del tenant. El puerto 8080 aparece en la pestaña **Ports** del Codespace o al abrir el enlace forwarded.
+El ID es el prefijo de la URL del tenant. El puerto 8080 aparece en la pestaña **Ports** del Codespace.
 
 </details>
+
+---
 
 ## Errores frecuentes
 
@@ -72,4 +257,15 @@ El environment ID es el prefijo de la URL del tenant. El puerto 8080 aparece en 
 |---------|----------------|-----------------|
 | `demo-api FAIL` | Postgres aún no healthy | Espera 30 s y repite health-check |
 | Docker permission denied | Daemon no listo tras crear Codespace | Reabre terminal o espera postCreate |
-| URL tenant incorrecta | Incluye `/apps` o barra final | Usa solo `https://<id>.live.dynatrace.com` |
+| URL tenant incorrecta | Copiaste una URL con `/ui/...` | Usa solo `https://<id>.live.dynatrace.com` o `.apps.dynatrace.com` |
+| No encuentro «Generate token» | Estás en Personal Access Tokens | Usa **Settings → Access tokens** (paso 2c) |
+| Mezclé tokens | Mismo valor en PaaS y API | Genera tres tokens **distintos** (pasos 2d y 2e) |
+| Perdí el token | Solo se muestra una vez al crear | Genera uno nuevo y actualiza `.env` |
+| OneAgent fallará en M03 | Token no es tipo PaaS | Regenera con plantilla **PaaS** (paso 2d) |
+| Operator fallará en M05 | API sin ReadConfig/WriteConfig | Regenera con asistente K8s o scopes del paso 2e |
+
+---
+
+## Qué sigue
+
+→ **[M01-02 — Primera navegación](M01-02-navegacion-ui.md)** (mapa de la UI; ya tienes tenant y tokens).

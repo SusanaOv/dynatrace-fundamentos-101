@@ -8,6 +8,15 @@
 | Puertos ocupados | `docker compose -f infra/docker-compose.yml down` y reintenta |
 | Sin Docker | Espera `postCreate` del Codespace o reinicia el Codespace |
 
+## Tokens y `.env` (M01)
+
+| Problema | Solución |
+|----------|----------|
+| No encuentro Access tokens | <kbd>Ctrl</kbd>+<kbd>K</kbd> → `Access tokens` (Settings) o Settings → Environment segmentation → Access control |
+| URL incorrecta en `.env` | Solo `https://<id>.live.dynatrace.com` o `.apps.dynatrace.com` — sin `/ui/...` |
+| Perdí un token | Genera otro en Access tokens; actualiza `.env` (solo se muestra una vez) |
+| Mezclé PaaS y API | Son tres tokens distintos — ver M01-01 pasos 2d y 2e |
+
 ## OneAgent (M03)
 
 | Problema | Solución |
