@@ -135,24 +135,37 @@ Tienes **dos caminos**. Usa **A** si prefieres que Dynatrace marque los scopes; 
 
 **Acción:**
 
-1. Abre la app **Kubernetes** (dock o búsqueda global).
-2. Pulsa **Add cluster** (botón morado en Overview).
-3. Elige distribución **Other** / **Other provider** (no hace falta tener el clúster creado todavía).
-4. Sigue el asistente hasta la pantalla donde muestra **tokens** (API + ingest / data ingest).
-5. **Copia ambos tokens** por separado antes de cerrar el asistente.
+1. Abre la app **Kubernetes** → **Add cluster**.
+2. **Step 1 — Select distribution:** elige **Other distributions**.
+3. **Step 2 — Select observability options:** deja **Full-Stack observability** (recomendado).
+4. **Step 3 — Configure cluster:** pon un nombre (p. ej. `curso-lab-kind`); **Cluster size** → **Medium**.
+5. **Step 4 — Install Dynatrace Operator** (pantalla de la captura):
 
-![Kubernetes — Add cluster (asistente de tokens)](../img/M01-01-kubernetes-add-cluster.png)
+| En la pantalla de Dynatrace | Qué haces | Variable en `infra/.env` |
+|-----------------------------|-----------|--------------------------|
+| **Dynatrace Operator token** | Pulsa **Generate token** → icono **copiar** | `DYNATRACE_API_TOKEN=` |
+| **Data ingest token** | Pulsa **Generate token** → icono **copiar** | `DYNATRACE_INGEST_TOKEN=` |
+
+6. Pega **inmediatamente** ambos valores en `infra/.env` (paso 3). **No cierres** el asistente hasta
+   haberlos copiado: **solo se muestran una vez**.
+
+> [!WARNING]
+> **No hace falta** pulsar **Download dynakube.yaml** ni ejecutar los comandos `kubectl` / Helm de
+> esta pantalla para M01. El curso usa `scripts/operator-up.sh` y `infra/k8s/dynakube.yaml.tpl` en **M05**.
+> Aquí solo necesitas **los dos tokens**.
+
+![Kubernetes wizard — Step 4 tokens (valores redactados en captura)](../img/M01-01-kubernetes-tokens-wizard.png)
 
 **Qué es cada uno:**
 
 | Token del asistente | Variable `.env` |
 |---------------------|-----------------|
-| API / Platform | `DYNATRACE_API_TOKEN` |
-| Data ingest / Ingest | `DYNATRACE_INGEST_TOKEN` |
+| Dynatrace Operator token | `DYNATRACE_API_TOKEN` |
+| Data ingest token | `DYNATRACE_INGEST_TOKEN` |
 
 **Por qué:** El asistente crea tokens con scopes correctos para **Dynatrace Operator** y **Grail ingest**.
 
-**Resultado esperado:** Dos tokens distintos guardados (no uses el PaaS de 2d en su lugar).
+**Resultado esperado:** Dos tokens distintos guardados en `.env` (no uses el PaaS de 2d en su lugar).
 
 #### Opción B — Manual en Access tokens
 
