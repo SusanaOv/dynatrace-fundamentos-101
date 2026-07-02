@@ -14,25 +14,41 @@ Orientarte en la UI Dynatrace y localizar las apps y vistas que usarás en el cu
 
 ### En qué consiste
 
-Recorrido por Hub, búsqueda global y apps de infraestructura/logs (sin datos de lab aún si OneAgent no está instalado).
+Recorrido por Launcher, búsqueda global y apps de infraestructura, trazas y logs (sin datos del lab aún si OneAgent no está instalado).
 
 ### 1 — Hub y búsqueda
 
-**Acción:** Inicia sesión en tu tenant. Abre **Dynatrace Hub** y la **búsqueda global** (<kbd>Ctrl</kbd> + <kbd>K</kbd> o icono de lupa).
-**Por qué:** Hub concentra capacidades; la búsqueda acelera navegación en módulos siguientes.
-**Resultado esperado:** Localizas apps como **Infrastructure**, **Distributed traces**, **Logs**.
+**Acción:** Inicia sesión en tu tenant. Abre **Launcher** (página de inicio) y la **búsqueda global** (<kbd>Ctrl</kbd> + <kbd>K</kbd> o icono de lupa).
+**Por qué:** Launcher concentra apps y onboarding; la búsqueda acelera navegación en módulos siguientes.
+**Resultado esperado:** Localizas apps como **Infrastructure & Operations**, **Distributed Tracing** y **Logs**.
+
+![Launcher (Hub) con accesos a apps del curso](../img/M01-02-launcher-hub.png)
+
+![Búsqueda global con resultados de Infrastructure](../img/M01-02-busqueda-global.png)
+
+Vistas que reutilizarás en M04 y M06 (pueden mostrar onboarding o datos de demo del tenant hasta que instales OneAgent):
+
+![Distributed Tracing — onboarding](../img/M01-02-distributed-tracing.png)
+
+![Logs — onboarding](../img/M01-02-logs.png)
+
+![Services — explorer (preview/demo según tenant)](../img/M01-02-services.png)
 
 ### 2 — Vista de technologies
 
-**Acción:** Abre la app/vista de **Infrastructure** o **Hosts** (nombre puede variar según versión de UI).
+**Acción:** Abre la app **Infrastructure & Operations** → **Explorer** → **Hosts** (nombre puede variar según versión de UI).
 **Por qué:** En M03 aparecerán aquí los hosts del Codespace.
-**Resultado esperado:** Lista vacía o solo entidades del propio tenant demo; aún normal sin OneAgent.
+**Resultado esperado:** Lista vacía o mensaje «No data available»; aún normal sin OneAgent.
+
+![Infrastructure & Operations — Hosts sin datos (esperado antes de M03)](../img/M01-02-infrastructure-hosts.png)
 
 ### 3 — Settings de environment
 
-**Acción:** Navega a **Settings → Preferences → Environment** (ruta equivalente en tu versión).
+**Acción:** Abre **Settings** (búsqueda global o dock) → **General** → **Environment management**. También puedes ver el ID del environment en el perfil de usuario (esquina inferior izquierda).
 **Por qué:** Naming rules, maintenance windows y zones se configuran aquí (M06).
-**Resultado esperado:** Identificas el nombre del environment de tu trial.
+**Resultado esperado:** Identificas el nombre/ID del environment de tu trial.
+
+![Settings — Environment management](../img/M01-02-settings-environment.png)
 
 ## Comprueba tu entendimiento
 

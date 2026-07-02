@@ -34,7 +34,9 @@ Dynatrace es una plataforma de observabilidad **full-stack** alojada en **SaaS**
 1. En GitHub, el repositorio del curso se abre en Codespaces desde el fork del alumno.
 2. En el tenant Dynatrace, la app **Kubernetes** o el asistente de **Add monitoring** muestra cómo generar tokens Operator e ingest.
 3. Tras `./scripts/lab-up.sh`, los servicios `demo-web` y `demo-api` quedan accesibles en los puertos 8080 y 8081 del Codespace.
-4. En la UI Dynatrace, el menú principal conduce a **Hub**, **Apps** y vistas de infraestructura (aún vacías hasta M03).
+4. En la UI Dynatrace, el **Launcher** conduce a apps de infraestructura, trazas y logs (aún vacías o en onboarding hasta M03).
+
+![Launcher — apps del curso](../img/M01-02-launcher-hub.png)
 
 ## Ahora practica tú
 
