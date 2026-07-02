@@ -149,6 +149,17 @@ Tienes **dos caminos**. Usa **A** si prefieres que Dynatrace marque los scopes; 
 6. Pega **inmediatamente** ambos valores en `infra/.env` (paso 3). **No cierres** el asistente hasta
    haberlos copiado: **solo se muestran una vez**.
 
+> [!NOTE]
+> **¿Y si no hay botón «Guardar» o «Continuar» claro?** Normal. Este asistente **no persiste tu
+> progreso** como un formulario: es una guía de instalación. Lo único que importa para el curso en M01:
+> **(1)** pulsar **Generate token** en cada fila, **(2)** copiar ambos valores a `infra/.env`.
+> Después puedes **cerrar la pestaña** o salir del wizard — no tienes que ejecutar `kubectl` ni
+> **Download dynakube.yaml** hasta **M05**.
+>
+> **Qué queda guardado en Dynatrace:** los tokens creados (revocables en **Settings → Access tokens**).
+> **Qué debes guardar tú:** el texto del token en `.env` (Dynatrace **no** vuelve a mostrar el valor
+> completo).
+
 > [!WARNING]
 > **No hace falta** pulsar **Download dynakube.yaml** ni ejecutar los comandos `kubectl` / Helm de
 > esta pantalla para M01. El curso usa `scripts/operator-up.sh` y `infra/k8s/dynakube.yaml.tpl` en **M05**.
