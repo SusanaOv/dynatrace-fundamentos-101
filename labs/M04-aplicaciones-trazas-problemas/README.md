@@ -36,15 +36,15 @@ Un **span** es un paso (HTTP, query SQL, llamada Redis). Un **PurePath** es la c
 
 ## Demostración guiada
 
-1. **Distributed Tracing** → Process group `nginx` → trazas del loadgen (1 span).
-2. Mismo app → **Spans** → Service `demo-api` → `GET /work` → expandir INCRBY y SELECT.
-3. Inducir `/fail` → **Problems** (M04-02).
+1. Alumno confirma límite OneAgent (M03) — solo nginx en Tracing.
+2. Alumno **implementa OTel** en `api.py` siguiendo M04-01 (paso a paso).
+3. Se contrastan Spans `demo-api` vs trazas nginx; waterfall `/work` con Redis y Postgres.
 
 ## Ahora practica tú
 
 | Lab | Título | Qué harás |
 |-----|--------|-----------|
-| M04-01 | [Servicios y trazas](M04-01-servicios-trazas.md) | OneAgent vs OTel, waterfall `/work` |
+| M04-01 | [Servicios y trazas](M04-01-servicios-trazas.md) | **Tú** añades OTel a demo-api; validas spans |
 | M04-02 | [Problems Davis](M04-02-problems-davis.md) | Causa raíz |
 
 → **[M04-01](M04-01-servicios-trazas.md)** — requiere `DYNATRACE_INGEST_TOKEN` en `.env`.

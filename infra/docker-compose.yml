@@ -20,9 +20,6 @@ services:
     environment:
       DATABASE_URL: postgres://lab:lab@postgres:5432/lab
       REDIS_URL: redis://redis:6379/0
-      DYNATRACE_ENVIRONMENT_URL: ${DYNATRACE_ENVIRONMENT_URL:-}
-      DYNATRACE_INGEST_TOKEN: ${DYNATRACE_INGEST_TOKEN:-}
-      OTEL_SERVICE_NAME: demo-api
     depends_on:
       postgres:
         condition: service_healthy

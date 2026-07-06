@@ -2,179 +2,243 @@
 
 [← Página anterior](README.md) · [Siguiente página →](M04-02-problems-davis.md)
 
-> Práctica del módulo. Requiere M03-01 (OneAgent conectado) y `DYNATRACE_INGEST_TOKEN` en `infra/.env`.
+> **Formato del lab:** cada paso indica **dónde** actuar, **qué** hacer, **para qué**, **cómo validar** y **qué comprender**. Tú implementas el código; el repo solo trae el **starter**.
 
-### Objetivo
+---
 
-Comparar lo que ve **OneAgent** (infra/nginx) con lo que ve **OpenTelemetry** en `demo-api`, y seguir una traza `GET /work` hasta Redis y PostgreSQL.
+## Punto de partida (starter)
 
-### Modelo del lab (Codespace)
+Tras M03 deberías tener:
+
+| Elemento | Estado |
+|----------|--------|
+| OneAgent contenedor | Conectado; host y contenedores visibles en Infrastructure |
+| `infra/demo-web/api.py` | Flask **sin** OpenTelemetry |
+| Distributed Tracing | Trazas de **nginx** (`Process group` = `nginx`), no de Flask |
+| `infra/.env` | `DYNATRACE_INGEST_TOKEN` con scope `openTelemetryTrace.ingest` |
+
+**No es un error** si Services está vacío o solo ves nginx: es el límite que descubriste en M03.
+
+---
+
+## Parte A — Confirmar el límite de OneAgent
+
+### Paso 1 — Trazas nginx (OneAgent)
+
+| | |
+|-|-|
+| **Dónde** | Dynatrace → <kbd>Ctrl</kbd>+<kbd>K</kbd> → **Distributed Tracing** → **Explorer** |
+| **Acción** | Filtro **Process group** = `nginx` · timeframe **Last 30 minutes** |
+| **Para qué** | Ver qué observa OneAgent **sin** tocar código |
+| **Validar** | Filas con Service `localhost:80`, Endpoint `/` |
+| **Comprender** | Es tráfico loadgen → demo-web; **1 span** = solo capa nginx |
+
+![Tracing nginx](../img/M04-01-tracing-nginx.png)
+
+### Paso 2 — Comprobar que Flask no aparece
+
+| | |
+|-|-|
+| **Dónde** | Mismo Explorer; quita filtros |
+| **Acción** | Filtro **Service name** = `demo-api` → **Change to spans** |
+| **Para qué** | Contrastar antes/después de instrumentar |
+| **Validar** | **Sin filas** (o solo ruido ajeno al lab) |
+| **Comprender** | OneAgent en Codespace **no** deep-monitors `api.py` |
+
+---
+
+## Parte B — Instrumentar demo-api con OpenTelemetry
+
+### Paso 3 — Token ingest
+
+| | |
+|-|-|
+| **Dónde** | Dynatrace → **Access tokens** → **Generate new token** |
+| **Acción** | Nombre `curso-otel-ingest` · scope **`openTelemetryTrace.ingest`** |
+| **Para qué** | Autorizar OTLP desde la app al tenant |
+| **Validar** | Token copiado **sin caracteres extra** al final en `infra/.env` |
+| **Comprender** | **PaaS** = OneAgent · **Ingest** = OTel (tokens distintos) |
+
+### Paso 4 — Dependencias Python
+
+| | |
+|-|-|
+| **Dónde** | `infra/demo-web/requirements.txt` |
+| **Acción** | Añade al final del fichero: |
 
 ```text
-OneAgent contenedor  →  host, contenedores, nginx (Process group)
-demo-api + OTel      →  OTLP → tenant → Spans: GET /work, INCRBY, SELECT
+opentelemetry-api>=1.27
+opentelemetry-sdk>=1.27
+opentelemetry-exporter-otlp-proto-http>=1.27
+opentelemetry-instrumentation-flask>=0.48b0
+opentelemetry-instrumentation-psycopg2>=0.48b0
+opentelemetry-instrumentation-redis>=0.48b0
 ```
 
-> En Codespace **no** hay OneAgent nativo en el host. La app envía trazas con **ingest token** (`openTelemetryTrace.ingest`).
+| **Para qué** | SDK + export OTLP + auto-instrumentación Flask/Redis/Postgres |
+| **Validar** | Fichero guardado con las 6 líneas nuevas |
+| **Comprender** | Instrumentación **en la app**, no otro OneAgent en el contenedor |
 
-### Prerrequisitos
+### Paso 5 — Código OTel en `api.py`
 
-- M03-01 completado.
-- En `infra/.env`:
-  - `DYNATRACE_ENVIRONMENT_URL=https://<id>.live.dynatrace.com`
-  - `DYNATRACE_INGEST_TOKEN` con scope **`openTelemetryTrace.ingest`** (sin caracteres extra al copiar).
-- `./scripts/lab-up.sh` (reconstruye `demo-api` con OTel).
+| | |
+|-|-|
+| **Dónde** | `infra/demo-web/api.py` |
+| **Acción** | Justo **después** de `app = Flask(__name__)` pega la función y su llamada: |
 
----
+```python
+def _configure_otel() -> None:
+    base = os.environ.get("DYNATRACE_ENVIRONMENT_URL", "").strip().rstrip("/")
+    token = os.environ.get("DYNATRACE_INGEST_TOKEN", "").strip()
+    if not base or not token:
+        return
 
-### Paso 1 — Recordar qué ve OneAgent solo
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.flask import FlaskInstrumentor
+    from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+    from opentelemetry.instrumentation.redis import RedisInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-**Acción:** <kbd>Ctrl</kbd>+<kbd>K</kbd> → **Distributed Tracing** → **Explorer**.
+    exporter = OTLPSpanExporter(
+        endpoint=f"{base}/api/v2/otlp/v1/traces",
+        headers={"Authorization": f"Api-Token {token}"},
+    )
+    provider = TracerProvider(resource=Resource.create({"service.name": "demo-api"}))
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    trace.set_tracer_provider(provider)
 
-**Filtro (clave = valor):**
+    FlaskInstrumentor().instrument_app(app)
+    Psycopg2Instrumentor().instrument()
+    RedisInstrumentor().instrument()
 
-1. Clic **Type to filter** → **Process group** → `nginx`
-2. Timeframe: **Last 30 minutes**
 
-**Qué observar**
+_configure_otel()
+```
 
-| Columna | Valor típico | Interpretación |
-|---------|--------------|----------------|
-| Service | `localhost:80` | Tráfico del **loadgen → demo-web** (no el API) |
-| Endpoint | `/` | Página estática nginx |
-| Process group | `nginx` | OneAgent, capa infra/HTTP superficial |
+| **Para qué** | Enviar spans **directo al tenant** (`/api/v2/otlp/v1/traces`) |
+| **Validar** | `_configure_otel()` está **antes** de las rutas `@app.get` |
+| **Comprender** | `SimpleSpanProcessor` exporta al vuelo (mejor para el lab que batch) |
 
-**Resultado esperado:** muchas filas; waterfall con **1 span** (solo nginx).
+### Paso 6 — Variables en Compose
 
-> Si el filtro tarda unos segundos en cargar, es normal.
+| | |
+|-|-|
+| **Dónde** | `infra/docker-compose.yml` → servicio `demo-api` → `environment` |
+| **Acción** | Añade: |
 
-![Tracing — Process group nginx](../img/M04-01-tracing-nginx.png)
+```yaml
+      DYNATRACE_ENVIRONMENT_URL: ${DYNATRACE_ENVIRONMENT_URL:-}
+      DYNATRACE_INGEST_TOKEN: ${DYNATRACE_INGEST_TOKEN:-}
+      OTEL_SERVICE_NAME: demo-api
+```
 
----
+| **Para qué** | Pasar tenant y token al contenedor sin commitear secretos |
+| **Validar** | `DATABASE_URL` y `REDIS_URL` siguen presentes |
+| **Comprender** | `.env` del host → variables del contenedor `demo-api` |
 
-### Paso 2 — Generar tráfico al API
+### Paso 7 — Arranque con auto-instrumentación
 
-**Acción:**
+| | |
+|-|-|
+| **Dónde** | `infra/demo-web/Dockerfile.api` — última línea |
+| **Acción** | Cambia `CMD` a: |
+
+```dockerfile
+CMD ["opentelemetry-instrument", "python", "api.py"]
+```
+
+| **Para qué** | Wrapper OTel recomendado para Flask en contenedor |
+| **Validar** | `COPY requirements.txt api.py .` en el Dockerfile (no solo `api.py`) |
+
+### Paso 8 — Rebuild y comprobar ingest
+
+| | |
+|-|-|
+| **Dónde** | Terminal del Codespace |
+| **Acción** | |
 
 ```bash
-./scripts/generate-load.sh http://127.0.0.1:8081 90
+docker compose -f infra/docker-compose.yml up -d --build --force-recreate demo-api
+for i in $(seq 1 30); do curl -s http://127.0.0.1:8081/work >/dev/null; done
 ```
 
-**Qué observar en terminal:** peticiones sin error de conexión.
+| **Para qué** | Imagen nueva con OTel + tráfico |
+| **Validar** | `curl http://127.0.0.1:8081/work` devuelve JSON con `hits` |
+| **Comprender** | Sin `--build` los cambios de código **no** entran en la imagen |
 
-**Resultado esperado:** script termina con «Listo».
+Si ingest falla (401): regenera token — ver [TROUBLESHOOTING](../TROUBLESHOOTING.md).
 
 ---
 
-### Paso 3 — Abrir trazas OTel (vista Spans)
+## Parte C — Validar y interpretar en Dynatrace
 
-**Acción:** Misma app **Distributed Tracing** → **Explorer**.
+### Paso 9 — Spans de demo-api
 
-1. Quita filtros anteriores
-2. **Type to filter** → **Service name** → `demo-api`
-3. Si la tabla de Requests está vacía → clic **Change to spans** (abajo)
+| | |
+|-|-|
+| **Dónde** | **Distributed Tracing** → **Explorer** → **Change to spans** |
+| **Acción** | Filtro **Service name** = `demo-api` |
+| **Para qué** | OTel aparece como **spans**, no siempre como Requests |
+| **Validar** | Filas **GET /work** (Span kind `server`, status Ok) |
+| **Comprender** | Filtros son **clave = valor**; `/work` suelto en rojo = inválido |
 
-**Qué observar**
+![Spans demo-api](../img/M04-01-spans-demo-api.png)
 
-| Columna | Valor esperado |
-|---------|----------------|
-| Span name | `GET /work` (también `/health`, `/slow`…) |
-| Service | `demo-api` |
-| Span kind | `server` |
-| Span status | `Ok` |
+### Paso 10 — Waterfall de `/work`
 
-**Resultado esperado:** al menos una fila `GET /work` distinta de `otel-smoke-test` (si hiciste la prueba manual).
-
-> **Services** (app aparte) puede seguir en onboarding; en este lab el foco es **Distributed Tracing → Spans**.
-
-![Spans — Service demo-api](../img/M04-01-spans-demo-api.png)
-
----
-
-### Paso 4 — Analizar el waterfall de `/work`
-
-**Acción:** Clic en una fila **GET /work**.
-
-**Qué observar en el waterfall**
-
-```text
-server  GET /work     ← Flask (span raíz, HTTP 200)
- ├─ client INCRBY     ← Redis
- └─ client SELECT     ← PostgreSQL
-```
-
-| Panel | Qué mirar | Qué interpretar |
-|-------|-----------|-----------------|
-| Waterfall | Barras anidadas | **Cadena de dependencias** de la petición |
-| Duración total | ~50–400 ms en `/work` | Latencia de app + I/O |
-| Span details (derecha) | HTTP status **200**, host `demo-api:8081` | Petición correcta |
-| Logs (abajo) | Puede estar vacío | Logs OTel no configurados en M04; normal |
-
-**Preguntas de interpretación**
-
-1. ¿Cuántos spans hay? → Mínimo 3 (HTTP + Redis + DB).
-2. ¿Dónde está el tiempo? → Mayormente en el span raíz (sleep + I/O).
-3. ¿OneAgent mostraría esto sin OTel? → **No** en Codespace (deep monitoring limitado).
-
-**Resultado esperado:** waterfall con hijos **INCRBY** y **SELECT**.
+| | |
+|-|-|
+| **Dónde** | Clic en una fila **GET /work** |
+| **Acción** | Expande el waterfall y el panel derecho |
+| **Para qué** | Ver cadena app → dependencias |
+| **Validar** | Hijos **INCRBY** (Redis) y **SELECT** (Postgres) |
+| **Comprender** | Cada barra = un **span**; el tiempo se reparte entre hops |
 
 ![Waterfall GET /work](../img/M04-01-waterfall-get-work.png)
 
----
+| Panel | Qué mirar |
+|-------|-----------|
+| Waterfall | Jerarquía y duración |
+| Span details | HTTP 200, `demo-api:8081` |
+| Logs | Puede estar vacío en M04 — normal |
 
-### Paso 5 — Comparar `/work` y `/slow`
+### Paso 11 — Comparar `/slow`
 
-**Acción:**
-
-```bash
-curl -s http://127.0.0.1:8081/work
-curl -s http://127.0.0.1:8081/slow
-```
-
-En Spans, filtra **Span name** = `GET /slow` (o busca en la tabla con **Service** = `demo-api`).
-
-**Qué observar:** duración de `/slow` ≈ **3 s** vs `/work` < 1 s.
-
-**Resultado esperado:** diferencia clara de latencia en la columna Duration.
-
----
-
-### Paso 6 — Errores HTTP (`/fail`)
-
-**Acción:**
-
-```bash
-for i in $(seq 1 20); do curl -s http://127.0.0.1:8081/fail >/dev/null; done
-```
-
-**Filtro:** **HTTP status** = `500` o **Span name** contiene `fail`.
-
-**Qué observar:** spans con status distinto de Ok (según versión UI).
-
-**Resultado esperado:** trazas de error listas para **M04-02 Problems**.
+| | |
+|-|-|
+| **Dónde** | Terminal + Spans |
+| **Acción** | `curl -s http://127.0.0.1:8081/slow` · busca **GET /slow** |
+| **Para qué** | Latencia visible en observabilidad |
+| **Validar** | Duration ≈ **3 s** vs `/work` < 1 s |
+| **Comprender** | Mismo servicio, distinto comportamiento = distinta señal |
 
 ---
 
-## Comprueba tu entendimiento
+## Cierre del lab
 
-| Pregunta | Respuesta |
-|----------|-----------|
-| ¿Por qué nginx aparece con OneAgent pero Flask no (antes de OTel)? | Deep monitoring limitado en contenedor |
-| ¿Qué token usa OTel? | `DYNATRACE_INGEST_TOKEN` (no PaaS) |
-| ¿Dónde ves `GET /work`? | Distributed Tracing → **Spans** → Service `demo-api` |
-| ¿Qué son INCRBY y SELECT? | Spans hijos Redis y Postgres |
+| Pregunta | Respuesta esperada |
+|----------|-------------------|
+| ¿Qué ve OneAgent sin OTel? | nginx, infra |
+| ¿Qué añade OTel? | Spans Flask + Redis + Postgres |
+| ¿Dónde se busca? | Spans → Service `demo-api` |
+| ¿Qué token usa OTel? | Ingest, no PaaS |
 
-## Errores frecuentes
+→ Siguiente: **[M04-02 — Problems Davis](M04-02-problems-davis.md)**
 
-| Síntoma | Cómo arreglarlo |
-|---------|-----------------|
-| Sin spans `demo-api` | Token ingest inválido (401) → regenera con `openTelemetryTrace.ingest`; [TROUBLESHOOTING](../TROUBLESHOOTING.md) |
-| Filtro `/work` en rojo | Usa **Span name** o **Service name**, no texto suelto |
-| Solo `otel-smoke-test` | Rebuild: `docker compose -f infra/docker-compose.yml up -d --build demo-api` |
-| Solo nginx en tracing | Estás en Process group nginx; cambia a Service `demo-api` + Spans |
+---
 
-## Referencia
+## Si te atascas
 
-- `infra/demo-web/api.py` — instrumentación OTel
-- `scripts/generate-load.sh`
-- [Dynatrace OTLP ingest](https://docs.dynatrace.com/docs/ingest-from/opentelemetry)
+<details>
+<summary>Checklist rápida</summary>
+
+1. `DYNATRACE_ENVIRONMENT_URL` con **`.live.dynatrace.com`**
+2. Ingest token sin basura al copiar
+3. `docker compose ... up -d --build demo-api`
+4. Vista **Spans**, no solo Requests
+5. [TROUBLESHOOTING — OTel](../TROUBLESHOOTING.md#opentelemetry--demo-api-m04)
+
+</details>

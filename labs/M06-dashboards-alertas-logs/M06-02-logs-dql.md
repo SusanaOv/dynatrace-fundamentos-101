@@ -2,7 +2,15 @@
 
 [← Página anterior](M06-01-dashboards-notebooks.md) · [Siguiente página →](../../README.md)
 
-> Práctica del módulo — cierre del curso.
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+M06-01 hecho; dashboard guardado. OneAgent + tráfico reciente en el lab.
+
+---
 
 ### Objetivo
 

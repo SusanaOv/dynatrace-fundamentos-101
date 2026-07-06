@@ -2,7 +2,21 @@
 
 [← Página anterior](README.md) · [Siguiente página →](M02-02-entidades-naming.md)
 
-> Práctica del módulo. Requiere **M03-01** (OneAgent conectado).
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+| Elemento | Estado |
+|----------|--------|
+| M03-01 | Completado — OneAgent + contenedores visibles |
+| Smartscape | Sin recorrer aún |
+| `api.py` | Starter sin OTel |
+
+**Validar antes de empezar:** Infrastructure muestra host `codespaces-…` con contenedores del lab.
+
+---
 
 ### Objetivo
 

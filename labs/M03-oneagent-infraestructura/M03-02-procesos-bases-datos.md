@@ -2,7 +2,19 @@
 
 [← Página anterior](M03-01-oneagent-compose.md) · [Siguiente página →](../M02-arquitectura-smartscape/M02-01-smartscape-recorrido.md)
 
-> Práctica del módulo. La teoría y la demo están en el [README del módulo](README.md).
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+| Elemento | Estado |
+|----------|--------|
+| OneAgent | Conectado (M03-01) |
+| Host | Visible con pestañas Overview / Containers / Processes |
+| Tracing | Solo nginx hasta M04 |
+
+---
 
 ### Objetivo
 

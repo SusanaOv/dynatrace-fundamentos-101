@@ -5,10 +5,21 @@
 > Práctica del módulo. **Lee primero** la [teoría y el mapa de la UI](README.md#teoria) del README —
 > este lab asume que nunca has abierto Dynatrace.
 
-### Objetivo
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
 
-Entender **qué es cada zona de la pantalla**, saber **moverte sin perderte** y localizar las apps
-que usarás en el curso. **No** necesitas ver datos de tus aplicaciones todavía.
+---
+
+## Punto de partida (starter)
+
+| Elemento | Estado |
+|----------|--------|
+| Tenant trial | Sesión iniciada en el navegador |
+| Datos del lab | **No** hace falta — este lab es solo mapa de UI |
+| OneAgent | Aún no (M03) |
+
+---
+
+### Objetivo
 
 ### Prerrequisitos
 

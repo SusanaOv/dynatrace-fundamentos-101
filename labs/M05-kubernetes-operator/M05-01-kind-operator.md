@@ -2,7 +2,19 @@
 
 [← Página anterior](README.md) · [Siguiente página →](M05-02-workloads-kubernetes.md)
 
-> Práctica del módulo.
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+| Elemento | Estado |
+|----------|--------|
+| `.env` | `DYNATRACE_API_TOKEN` + `DYNATRACE_INGEST_TOKEN` (distintos del PaaS M03) |
+| Docker Compose | Puede seguir activo en paralelo |
+| kind | No instalado aún |
+
+---
 
 ### Objetivo
 

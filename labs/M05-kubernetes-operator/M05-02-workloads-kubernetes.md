@@ -2,7 +2,15 @@
 
 [← Página anterior](M05-01-kind-operator.md) · [Siguiente página →](../M06-dashboards-alertas-logs/README.md)
 
-> Práctica del módulo.
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+M05-01 completado — DynaKube **Running**, `kubectl get nodes` OK.
+
+---
 
 ### Objetivo
 

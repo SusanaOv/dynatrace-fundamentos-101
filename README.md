@@ -10,7 +10,9 @@ Formación **100 % práctica**: monitorizas aplicaciones reales en un Codespace 
 2. Abre un **Codespace** desde tu fork.
 3. Sigue los módulos en orden con **← Página anterior · Siguiente página →**.
 
-Cada módulo tiene **teoría + demostración** en su README y **laboratorios** (`Mxx-NN`) donde practicas tú.
+Cada módulo tiene **teoría + demostración** en su README y **laboratorios** (`Mxx-NN`) donde practicas tú paso a paso.
+
+Los labs parten de un **starter** (código y scripts en el repo); tú validas en Dynatrace y, en M04, **añades OpenTelemetry** siguiendo las instrucciones. Ver [labs/README.md](labs/README.md).
 
 ## Antes de empezar
 

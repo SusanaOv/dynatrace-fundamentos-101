@@ -2,7 +2,15 @@
 
 [← Página anterior](README.md) · [Siguiente página →](M06-02-logs-dql.md)
 
-> Práctica del módulo.
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+M03–M04 con datos (host, spans `demo-api` si completaste OTel en M04-01).
+
+---
 
 ### Objetivo
 

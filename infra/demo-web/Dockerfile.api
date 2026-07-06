@@ -5,4 +5,4 @@ COPY requirements.txt api.py .
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8081
-CMD ["opentelemetry-instrument", "python", "api.py"]
+CMD ["python", "api.py"]

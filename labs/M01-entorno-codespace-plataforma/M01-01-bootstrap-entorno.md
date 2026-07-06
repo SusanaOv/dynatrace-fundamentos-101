@@ -6,6 +6,24 @@
 > **¿Primera vez con Dynatrace?** Haz primero el paso **2** (tenant + tokens) aunque el Codespace
 > aún no esté listo.
 
+> **Formato del lab:** cada paso indica **dónde** actuar, **qué** hacer, **para qué**, **cómo validar** y **qué comprender**.
+
+---
+
+## Punto de partida (starter)
+
+| Elemento | Estado |
+|----------|--------|
+| Repo | Fork de `dynatrace-fundamentos-101` sin personalizar |
+| Codespace | Aún no creado o recién creado |
+| `infra/.env` | Plantilla vacía (desde `.env.example`) |
+| Dynatrace | Trial por crear o recién creado |
+| Stack Docker | No levantada |
+
+**Al terminar este lab:** `.env` con URL y tokens, `lab-up.sh` OK, `health-check` con demo-web y demo-api en verde.
+
+---
+
 ### Objetivo
 
 Dejar operativo tu fork, Codespace, tenant Dynatrace (URL + tokens en `.env`) y stack Docker del curso.

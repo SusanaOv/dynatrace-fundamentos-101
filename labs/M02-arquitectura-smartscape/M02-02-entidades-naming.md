@@ -2,7 +2,15 @@
 
 [← Página anterior](M02-01-smartscape-recorrido.md) · [Siguiente página →](../M04-aplicaciones-trazas-problemas/README.md)
 
-> Práctica del módulo. Requiere **M03-01**.
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+M02-01 hecho; host y contenedores identificados en Smartscape o Infrastructure.
+
+---
 
 ### Objetivo
 

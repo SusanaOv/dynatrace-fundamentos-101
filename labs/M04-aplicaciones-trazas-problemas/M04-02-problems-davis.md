@@ -2,7 +2,18 @@
 
 [← Página anterior](M04-01-servicios-trazas.md) · [Siguiente página →](../M05-kubernetes-operator/README.md)
 
-> Práctica del módulo.
+> **Formato del lab:** **dónde** · **acción** · **para qué** · **validar** · **comprender**.
+
+---
+
+## Punto de partida (starter)
+
+| Elemento | Estado |
+|----------|--------|
+| M04-01 | Completado — OTel en `api.py`, spans `GET /work` visibles |
+| Endpoints | `/fail` y `/slow` disponibles sin cambios de código |
+
+---
 
 ### Objetivo
 
