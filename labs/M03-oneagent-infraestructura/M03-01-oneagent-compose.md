@@ -6,94 +6,120 @@
 
 ### Objetivo
 
-Desplegar OneAgent en el Codespace y confirmar que Dynatrace monitoriza el host y los contenedores del laboratorio.
+Desplegar OneAgent, validar **infraestructura** en Dynatrace y comprobar los **límites** del agente en contenedor en Codespace (preparación para OTel en M04).
 
 ### Prerrequisitos
 
 - M01-01 completado (`./scripts/lab-up.sh` OK).
-- **PaaS token** generado en el tenant Dynatrace.
+- `DYNATRACE_ENVIRONMENT_URL` con dominio **`.live.dynatrace.com`** en `infra/.env`.
+- **PaaS token** en `ONEAGENT_PAAS_TOKEN`.
 
-### En qué consiste
+---
 
-Configuras `ONEAGENT_PAAS_TOKEN`, ejecutas el script del curso, esperas la conexión y verificas entidades de infraestructura en la UI.
+### Paso 1 — Desplegar OneAgent
 
-### 1 — Generar PaaS token
-
-**Acción:** En Dynatrace, abre **Access tokens** (o Hub → **OneAgent** → **Set up** → **Linux**). Genera un token de tipo **PaaS** con permisos de instalación de OneAgent.
-**Por qué:** El contenedor `dynatrace/oneagent` descarga el instalador autenticándose con este token.
-**Resultado esperado:** Token copiado de forma segura (no en el repositorio).
-
-### 2 — Rellenar `infra/.env`
-
-**Acción:** Añade a `infra/.env`:
-
-```bash
-DYNATRACE_ENVIRONMENT_URL=https://<tu-env-id>.live.dynatrace.com
-DYNATRACE_ENVIRONMENT_ID=<tu-env-id>
-ONEAGENT_PAAS_TOKEN=<paas-token>
-```
-
-**Por qué:** `scripts/oneagent-up.sh` construye la URL del instalador a partir del tenant si no defines `ONEAGENT_INSTALLER_SCRIPT_URL`.
-**Resultado esperado:** Variables presentes sin commitear el fichero (`.env` está en `.gitignore`).
-
-### 3 — Desplegar OneAgent
-
-**Acción:** Desde la raíz del repo ejecuta:
+**Acción:**
 
 ```bash
 ./scripts/oneagent-up.sh
 ./scripts/oneagent-status.sh
 ```
 
-**Por qué:** Levanta el contenedor `dynatrace-oneagent` en modo `--privileged` con `--pid=host` y `--network=host`, patrón recomendado para Docker sin orquestador.
-**Resultado esperado:** Contenedor `running`; logs sin errores repetidos de descarga/instalación.
+**Qué observar en terminal**
 
-### 4 — Validar en Dynatrace
+| Señal | Interpretación |
+|-------|----------------|
+| `OneAgent arrancado` + estado **Up** | Agente descargado y en ejecución |
+| `Restarting` / `Initialization failed` | Ver [TROUBLESHOOTING](../TROUBLESHOOTING.md#oneagent-no-arranca-o-reinicia-m03) |
+| Logs `Healthy(0)` | Procesos internos del agente OK |
 
-**Acción:** Abre **Deployments → OneAgents** (o **Infrastructure → OneAgents** según tu versión de UI). Busca el host del Codespace.
-**Por qué:** Confirma conectividad tenant ↔ OneAgent antes de analizar métricas.
-**Resultado esperado:** OneAgent **Connected** / **Monitoring** en el host.
+**Resultado esperado:** contenedor `dynatrace-oneagent` estable (no reinicia cada minuto).
 
-### 5 — Esperar descubrimiento de contenedores
+---
 
-**Acción:** Mantén `./scripts/lab-up.sh` activo. Espera **2–5 minutos**. Abre **Infrastructure → Hosts** → tu host → pestaña/sección **Containers** (o **Processes**).
-**Por qué:** El descubrimiento de contenedores Docker no es instantáneo.
-**Resultado esperado:** Contenedores `infra-demo-api-1`, `infra-postgres-1`, `infra-redis-1`, etc.
+### Paso 2 — Validar conexión del agente
 
-## Comprueba tu entendimiento
+**Acción:** <kbd>Ctrl</kbd>+<kbd>K</kbd> → **OneAgent health** (o **Deployments → OneAgents**).
 
-**Host visible**
-En Infrastructure, localiza el host del Codespace y comprueba que muestra métricas de CPU/memoria en los últimos 5 minutos.
-→ Gráficas con datos, no «No data».
+**Qué observar**
 
-**Contenedores del lab**
-Identifica al menos tres contenedores cuyo nombre contenga `demo-api`, `postgres` o `redis`.
-→ Aparecen vinculados al host del Codespace.
+| Elemento | Qué significa |
+|----------|----------------|
+| Gráfica/tarta con **1 agente** conectado | Tu Codespace reporta al tenant |
+| Host `codespaces-…` | Entidad del lab (no confundir con demo del trial) |
 
-## Reto
+**Resultado esperado:** al menos **un** OneAgent conectado tras 2–5 min.
 
-### 1 — Reinicio controlado
+---
 
-Para el contenedor OneAgent con `./scripts/oneagent-down.sh`, vuelve a levantarlo y comprueba que el host reconecta sin reinstalar manualmente el token.
+### Paso 3 — Infraestructura: host y contenedores
 
-<details>
-<summary>Ver orientación</summary>
+**Acción:** <kbd>Ctrl</kbd>+<kbd>K</kbd> → **Infrastructure** → abre el host `codespaces-…`.
 
-Tras `oneagent-down` + `oneagent-up`, el host puede tardar unos minutos en volver a **Connected**. Los tokens en `.env` deben seguir siendo válidos.
+**Qué observar por pestaña**
 
-</details>
+| Pestaña | Qué mirar | Qué interpretar |
+|---------|-----------|-----------------|
+| **Overview** | Tecnologías (Python, Postgres, Docker…) | Dynatrace **descubre** stack sin configurar nada |
+| **Containers** | `infra-demo-api`, `postgres`, `redis`, `nginx`… | Stack Compose visible |
+| **Processes** | `api.py`, `nginx`, Redis… | Procesos dentro del host |
+| **Info** | Versión OneAgent, Full stack | Agente activo en este host |
+
+**Resultado esperado:** contenedores del lab con CPU/memoria en los últimos 5 min.
+
+![Host → pestaña Containers](../img/M03-01-host-containers.png)
+
+---
+
+### Paso 4 — Deep monitoring: el límite del lab (importante)
+
+**Acción:** En el host → pestaña **Processes** → localiza `api.py` (demo-api).
+
+**Qué observar**
+
+| Columna Deep monitoring | Significado en Codespace |
+|---------------------------|--------------------------|
+| **Not applicable** | Monitorización solo de infra (Redis, procesos sistema) |
+| **Failed to enable** | OneAgent en contenedor **no inyecta** en ese proceso |
+| **Restart required** (nginx) | Proceso arrancó antes que el agente; reinicio puede ayudar |
+
+**Interpretación (para clase):**
+
+- OneAgent **sí** ve host, contenedores y procesos.
+- **No** garantiza trazas de aplicación Flask en Codespace (Docker anidado).
+- Por eso **Services** puede seguir vacío y **Distributed Tracing** solo muestra **nginx** (`localhost:80`) — eso **no es error del alumno**.
+
+**Comprueba:** <kbd>Ctrl</kbd>+<kbd>K</kbd> → **Distributed Tracing** → filtro **Process group** = `nginx` → ves trazas del loadgen a demo-web.
+
+![Processes — deep monitoring en demo-api](../img/M03-01-processes-deep-monitoring.png)
+
+**Resultado esperado:** entiendes la diferencia entre **infra observada** y **app no instrumentada aún**.
+
+---
+
+### Paso 5 — Cierre M03-01
+
+| Pregunta | Respuesta correcta |
+|----------|-------------------|
+| ¿Ves tu host en Infrastructure? | Sí |
+| ¿Ves contenedores del lab? | Sí |
+| ¿`demo-api` tiene deep monitoring OK? | A menudo **no** en Codespace |
+| ¿Qué módulo añade trazas de Flask? | **M04** (OpenTelemetry en demo-api) |
+
+→ Continúa con **[M03-02 — Procesos y bases de datos](M03-02-procesos-bases-datos.md)** y después **M04**.
+
+---
 
 ## Errores frecuentes
 
-| Síntoma | Causa probable | Cómo arreglarlo |
-|---------|----------------|-----------------|
-| `ERROR: ONEAGENT_PAAS_TOKEN vacío` | `.env` sin token | Genera PaaS token y rellena `.env` |
-| OneAgent container exit / crash loop | Token inválido o URL mal formada | Revisa URL sin `/apps`; regenera token |
-| Sin contenedores en UI | Lab parado o poco tiempo de espera | `lab-up.sh` + espera 5 min |
-| `permission denied` Docker | Daemon aún iniciando | Reintenta tras 30 s en Codespace |
-| Logs: download failed | Firewall o tenant incorrecto | Verifica HTTPS saliente y environment ID |
+| Síntoma | Cómo arreglarlo |
+|---------|-----------------|
+| `ERROR: ONEAGENT_PAAS_TOKEN vacío` | Genera PaaS token y rellena `.env` |
+| Contenedor reinicia | [TROUBLESHOOTING — OneAgent](../TROUBLESHOOTING.md#oneagent-no-arranca-o-reinicia-m03) |
+| Sin contenedores en UI | `lab-up.sh` + espera 5 min |
+| Services vacío tras M03 | **Normal** hasta M04 |
 
 ## Referencia
 
-- Script del curso: `scripts/oneagent-up.sh`
-- Documentación: [OneAgent as Docker container](https://docs.dynatrace.com/docs/ingest-from/setup-on-container-platforms/docker/set-up-dynatrace-oneagent-as-docker-container)
+- `scripts/oneagent-up.sh`
+- [OneAgent as Docker container](https://docs.dynatrace.com/docs/ingest-from/setup-on-container-platforms/docker/set-up-dynatrace-oneagent-as-docker-container)

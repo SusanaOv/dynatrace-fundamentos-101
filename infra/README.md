@@ -23,7 +23,7 @@ Comprobaciones:
 | Servicio | Puerto | Rol |
 |----------|--------|-----|
 | `demo-web` | 8080 | Frontend nginx |
-| `demo-api` | 8081 | API de ejemplo (genera tráfico interno) |
+| `demo-api` | 8081 | API Flask; trazas **OpenTelemetry → OTLP** al tenant (M04, requiere `DYNATRACE_INGEST_TOKEN`) |
 | `postgres` | 5432 | Base de datos del lab |
 | `redis` | 6379 | Cache del lab |
 | `loadgen` | — | Generador de carga periódica |

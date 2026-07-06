@@ -44,13 +44,17 @@ loadgen → demo-web / demo-api → Postgres / Redis
 
 ### Tokens que necesitas
 
-| Token | Uso en M03 |
-|-------|------------|
-| **PaaS** | Descargar e instalar OneAgent (`ONEAGENT_PAAS_TOKEN`) |
-| API plataforma | Opcional para automatización |
-| Ingest / Operator | Reservados para **M05** (Kubernetes) |
+| Token | Uso |
+|-------|-----|
+| **PaaS** | OneAgent contenedor — **M03** (`ONEAGENT_PAAS_TOKEN`) |
+| **Ingest** | Trazas OTel en demo-api — **M04** (`DYNATRACE_INGEST_TOKEN`, scope `openTelemetryTrace.ingest`) |
+| API / Operator | **M05** (Kubernetes) |
 
-Genera el **PaaS token** en tu tenant: **Access tokens → Generate token → PaaS** (o desde Hub → OneAgent → Set up → Linux).
+> En Codespace OneAgent **no** instala nativo en el host. La instrumentación profunda de Flask en M04 usa **OpenTelemetry → OTLP** al tenant.
+
+### Límite didáctico (Codespace)
+
+OneAgent en contenedor observa **infra** (host, contenedores, nginx). **Deep monitoring** de `api.py` suele fallar por Docker anidado. M03-01 incluye un paso para **ver ese límite** antes de M04.
 
 ## Demostración guiada
 
@@ -69,3 +73,5 @@ Genera el **PaaS token** en tu tenant: **Access tokens → Generate token → Pa
 | M03-02 | [Procesos y bases de datos](M03-02-procesos-bases-datos.md) | Infra del lab en Dynatrace |
 
 → Empieza por **[M03-01 — OneAgent en Compose](M03-01-oneagent-compose.md)**.
+
+Si el contenedor no arranca o el host no aparece en Dynatrace → **[TROUBLESHOOTING — OneAgent (M03)](../TROUBLESHOOTING.md#oneagent-no-arranca-o-reinicia-m03)**.

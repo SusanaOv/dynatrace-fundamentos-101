@@ -12,6 +12,38 @@ from psycopg2 import connect
 app = Flask(__name__)
 
 
+def _configure_otel() -> None:
+    """OTLP directo al tenant (Codespace: OneAgent contenedor no deep-monitors Flask)."""
+    base = os.environ.get("DYNATRACE_ENVIRONMENT_URL", "").strip().rstrip("/")
+    token = os.environ.get("DYNATRACE_INGEST_TOKEN", "").strip()
+    if not base or not token:
+        return
+
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.flask import FlaskInstrumentor
+    from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+    from opentelemetry.instrumentation.redis import RedisInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+
+    exporter = OTLPSpanExporter(
+        endpoint=f"{base}/api/v2/otlp/v1/traces",
+        headers={"Authorization": f"Api-Token {token}"},
+    )
+    provider = TracerProvider(resource=Resource.create({"service.name": "demo-api"}))
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    trace.set_tracer_provider(provider)
+
+    FlaskInstrumentor().instrument_app(app)
+    Psycopg2Instrumentor().instrument()
+    RedisInstrumentor().instrument()
+
+
+_configure_otel()
+
+
 def _redis_client() -> redis.Redis:
     return redis.from_url(os.environ.get("REDIS_URL", "redis://redis:6379/0"))
 

@@ -7,43 +7,44 @@
 
 ## Qué aprenderás
 
-- Identificar **servicios** instrumentados a partir del demo-api.
-- Seguir **PurePaths** (trazas distribuidas) de extremo a extremo.
-- Interpretar **Problems** detectados por **Davis AI** y su causa raíz.
+- Contrastar trazas **OneAgent** (nginx/infra) vs **OpenTelemetry** (`demo-api`).
+- Seguir spans de `GET /work` hasta Redis y PostgreSQL.
+- Interpretar **Problems** detectados por **Davis AI**.
 
 ## Teoría
 
-### De proceso a servicio
+### Dos canales de observabilidad en el lab
 
-OneAgent promueve procesos con tráfico HTTP/gRPC a entidades **Service**. En el lab, `demo-api` (Flask en :8081) aparece como servicio con métodos/endpoints (`/work`, `/health`, …).
+| Canal | Qué envía | Qué ves en UI |
+|-------|-----------|---------------|
+| **OneAgent** (contenedor) | Infra, procesos, HTTP superficial (nginx) | Process group `nginx`, `localhost:80` |
+| **OpenTelemetry** (demo-api) | Spans de Flask, Redis, Postgres | Service `demo-api`, vista **Spans** |
 
-### PurePath
+### Span y PurePath
 
-Un **PurePath** es la traza completa de una transacción: entrada → código → llamadas a Redis/Postgres → salida. Permite ver latencia por hop y errores por span.
+Un **span** es un paso (HTTP, query SQL, llamada Redis). Un **PurePath** es la cadena completa. En M04 el waterfall de `GET /work` muestra 3+ spans.
 
 ### Problems y Davis
 
-**Davis** correlaciona métricas, trazas y eventos. Un **Problem** agrupa síntomas (p. ej. latencia alta, tasa de error) con **impacto** (servicios afectados) y **root cause** sugerida.
+**Davis** correlaciona métricas y trazas. Endpoints del lab:
 
-| Señal en el lab | Endpoint | Efecto esperado |
-|-----------------|----------|-----------------|
-| Latencia | `GET /slow` | Response time elevado |
-| Error HTTP | `GET /fail` | 500 / failure rate |
-| Carga normal | `GET /work` | Tráfico baseline |
+| Endpoint | Efecto |
+|----------|--------|
+| `GET /work` | Baseline |
+| `GET /slow` | Latencia alta |
+| `GET /fail` | HTTP 500 |
 
 ## Demostración guiada
 
-> Recorrido del formador (tono descriptivo).
-
-1. Con OneAgent activo y `./scripts/generate-load.sh` en segundo plano, se abre **Distributed traces** filtrando por servicio demo-api.
-2. Se selecciona un PurePath de `/work` y se expanden spans hacia PostgreSQL.
-3. Se induce `/slow` y `/fail`; en **Problems** aparece un problem reciente con causa ligada al servicio demo-api.
+1. **Distributed Tracing** → Process group `nginx` → trazas del loadgen (1 span).
+2. Mismo app → **Spans** → Service `demo-api` → `GET /work` → expandir INCRBY y SELECT.
+3. Inducir `/fail` → **Problems** (M04-02).
 
 ## Ahora practica tú
 
 | Lab | Título | Qué harás |
 |-----|--------|-----------|
-| M04-01 | [Servicios y trazas](M04-01-servicios-trazas.md) | PurePath del lab |
-| M04-02 | [Problems Davis](M04-02-problems-davis.md) | Análisis de causa raíz |
+| M04-01 | [Servicios y trazas](M04-01-servicios-trazas.md) | OneAgent vs OTel, waterfall `/work` |
+| M04-02 | [Problems Davis](M04-02-problems-davis.md) | Causa raíz |
 
-→ Empieza por **[M04-01 — Servicios y trazas](M04-01-servicios-trazas.md)**.
+→ **[M04-01](M04-01-servicios-trazas.md)** — requiere `DYNATRACE_INGEST_TOKEN` en `.env`.

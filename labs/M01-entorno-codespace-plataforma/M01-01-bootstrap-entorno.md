@@ -42,8 +42,8 @@ validar con `health-check.sh`.
 
 | Qué anotar | Ejemplo | Variable `.env` |
 |------------|---------|---------------|
-| **URL del tenant** | `https://xpn34545.apps.dynatrace.com` | `DYNATRACE_ENVIRONMENT_URL` |
-| **Environment ID** | `xpn34545` (prefijo antes de `.live` o `.apps`) | `DYNATRACE_ENVIRONMENT_ID` |
+| **URL del tenant** | `https://<tu-id>.live.dynatrace.com` (recomendado en `.env`) | `DYNATRACE_ENVIRONMENT_URL` |
+| **Environment ID** | `<tu-id>` (prefijo antes de `.live` o `.apps`) | `DYNATRACE_ENVIRONMENT_ID` |
 
 **Qué es esto:** El **tenant** es tu cuenta cloud. El **environment ID** es el identificador corto del
 entorno de prácticas dentro de ese tenant.
@@ -57,7 +57,8 @@ entorno de prácticas dentro de ese tenant.
 
 > [!WARNING]
 > **Formato correcto de URL**
-> - ✅ `https://<id>.live.dynatrace.com` o `https://<id>.apps.dynatrace.com`
+> - ✅ En `infra/.env` usa **`https://<id>.live.dynatrace.com`** (aunque el navegador muestre `.apps.dynatrace.com`)
+> - ✅ El `<id>` debe coincidir **carácter a carácter** con la barra de direcciones (un dígito mal → fallo en M03)
 > - ❌ `https://<id>.apps.dynatrace.com/ui/apps/...` (eso es una **página**, no la URL base)
 > - ❌ Barra final `/` al end
 
@@ -72,7 +73,7 @@ usuario/contraseña de login.
 |--------------------------|----------------|------------------|
 | `ONEAGENT_PAAS_TOKEN` | Instalar **OneAgent** en Docker | **M03** |
 | `DYNATRACE_API_TOKEN` | **Operator** / API plataforma | **M05** |
-| `DYNATRACE_INGEST_TOKEN` | Enviar **métricas, logs y trazas** (Grail) | **M05** |
+| `DYNATRACE_INGEST_TOKEN` | Trazas **OTel** en demo-api + Operator M05 | **M04** y **M05** |
 
 **En M01-01 genera los tres ya** y guárdalos en `.env`. Así no interrumpes el curso en M03/M05.
 **Nadie los usa** hasta esos módulos, pero crear tokens requiere entender la UI — mejor hacerlo ahora.
@@ -98,7 +99,10 @@ usuario/contraseña de login.
 1. Abre la app **Settings** (dock o Launcher → Manage Dynatrace).
 2. En el panel izquierdo: **Environment segmentation** → **Access control** → **Access tokens**.
 
-**Resultado esperado:** Página **Access tokens** con botón tipo **Generate token** / **Create token**.
+**Resultado esperado:** Página **Access tokens** con botón **Generate new token** / **Generate token** (lista de tokens existentes).
+
+> Si solo ves **toggles** de configuración (sin lista ni botón generar), estás en Settings →
+> Environment segmentation. Usa <kbd>Ctrl</kbd>+<kbd>K</kbd> → `Access tokens` (app con lista AT).
 
 ![Settings → Access tokens](../img/M01-01-access-tokens.png)
 
@@ -180,7 +184,11 @@ Tienes **dos caminos**. Usa **A** si prefieres que Dynatrace marque los scopes; 
 
 #### Opción B — Manual en Access tokens
 
-**Acción:** Genera **dos** tokens en **Access tokens**:
+**Acción:** Genera **dos** tokens en **Access tokens** (lista con **Generate new token**, no la pantalla de toggles en Environment segmentation):
+
+**Ingest (M04/M05):** nombre `curso-otel-ingest` → scope **`openTelemetryTrace.ingest`** (busca en el buscador de scopes).
+
+**API (M05):** scopes `ReadConfig`, `WriteConfig` mínimo.
 
 1. **`curso-operator-api`** — tipo **API** con scopes mínimos:
    - `ReadConfig`
@@ -281,7 +289,7 @@ El ID es el prefijo de la URL del tenant. El puerto 8080 aparece en la pestaña 
 |---------|----------------|-----------------|
 | `demo-api FAIL` | Postgres aún no healthy | Espera 30 s y repite health-check |
 | Docker permission denied | Daemon no listo tras crear Codespace | Reabre terminal o espera postCreate |
-| URL tenant incorrecta | Copiaste una URL con `/ui/...` | Usa solo `https://<id>.live.dynatrace.com` o `.apps.dynatrace.com` |
+| URL tenant incorrecta | Copiaste `/ui/...` o el ID no coincide | Usa `https://<id>.live.dynatrace.com`; si M03 falla, ver [TROUBLESHOOTING](../TROUBLESHOOTING.md) |
 | No encuentro «Generate token» | Estás en Personal Access Tokens | Usa **Settings → Access tokens** (paso 2c) |
 | Mezclé tokens | Mismo valor en PaaS y API | Genera tres tokens **distintos** (pasos 2d y 2e) |
 | Perdí el token | Solo se muestra una vez al crear | Genera uno nuevo y actualiza `.env` |
