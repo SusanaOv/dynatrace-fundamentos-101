@@ -32,8 +32,16 @@ Navegas desde el host del Codespace hasta procesos y dependencias, identificando
 
 ### 1 — Abrir Smartscape
 
-**Acción:** En Dynatrace, abre **Smartscape** (o **Topology** / mapa de entidades según tu versión de UI). Filtra o busca el **host** de tu Codespace.
-**Por qué:** Smartscape muestra relaciones dinámicas, no solo listas aisladas.
+| | |
+|-|-|
+| **Dónde** | Dynatrace → <kbd>Ctrl</kbd>+<kbd>K</kbd> |
+| **Acción** | Escribe `Smartscape` y abre la app. Si no aparece, prueba `Topology` o **Infrastructure & Operations** → pestaña **Smartscape** / mapa. |
+| **Para qué** | Smartscape muestra relaciones dinámicas, no solo listas aisladas |
+| **Validar** | Vista de mapa o grafo de entidades |
+| **Comprender** | Es la misma topología que verás en incidentes reales |
+
+**Acción (continuación):** En el filtro o buscador del mapa, localiza el **host** de tu Codespace (nombre `codespaces-…` o similar al hostname de Infrastructure).
+
 **Resultado esperado:** Nodo de host visible con entidades hijas.
 
 ### 2 — Expandir contenedores

@@ -50,13 +50,23 @@ docker compose ps
 echo ""
 echo "HTTP checks:"
 
-# demo-web: frontend estático/simple en puerto 8080 del host.
-# >/dev/null descarta el body; solo nos importa el código HTTP.
-# && / || → Mensaje OK o FAIL según exit code de curl.
-curl -sf "http://127.0.0.1:8080/" >/dev/null && echo "  demo-web :8080 OK" || echo "  demo-web :8080 FAIL"
+# demo-api: endpoint /health — reintentos (demo-api tarda en arrancar tras compose up).
+http_ok() {
+  local url=$1 label=$2
+  local i
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    if curl -sf "$url" >/dev/null 2>&1; then
+      echo "  $label OK"
+      return 0
+    fi
+    sleep 2
+  done
+  echo "  $label FAIL"
+  return 1
+}
 
-# demo-api: endpoint /health diseñado para probes y comprobaciones de liveness.
-curl -sf "http://127.0.0.1:8081/health" >/dev/null && echo "  demo-api :8081 OK" || echo "  demo-api :8081 FAIL"
+http_ok "http://127.0.0.1:8080/" "demo-web :8080" || true
+http_ok "http://127.0.0.1:8081/health" "demo-api :8081" || true
 
 echo ""
 echo "Listo."

@@ -237,7 +237,7 @@ nano infra/.env   # o el editor que prefieras
 Rellena **como mínimo** (con tus valores reales):
 
 ```bash
-DYNATRACE_ENVIRONMENT_URL=https://<TU-ID>.apps.dynatrace.com
+DYNATRACE_ENVIRONMENT_URL=https://<TU-ID>.live.dynatrace.com
 DYNATRACE_ENVIRONMENT_ID=<TU-ID>
 ONEAGENT_PAAS_TOKEN=dt0c01.xxxxx
 DYNATRACE_API_TOKEN=dt0c01.xxxxx
@@ -271,6 +271,14 @@ echo "${ONEAGENT_PAAS_TOKEN:0:8}..."   # solo prefijo, no pegues el token en el 
 (hasta M03).
 
 **Resultado esperado:** `demo-web :8080 OK` y `demo-api :8081 OK`.
+
+Comprueba el checkpoint M01:
+
+```bash
+./scripts/validate-lab.sh
+```
+
+→ Debe terminar con **Resultado: OK** (avisos sobre tokens vacíos son normales si aún no los pegaste).
 
 ---
 

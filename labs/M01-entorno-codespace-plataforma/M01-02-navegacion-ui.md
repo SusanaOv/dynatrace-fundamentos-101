@@ -21,6 +21,9 @@
 
 ### Objetivo
 
+Orientarte en la interfaz Dynatrace (Launcher, búsqueda global, apps clave y Settings) **antes**
+de instalar OneAgent, para saber dónde mirar cuando lleguen datos en M03.
+
 ### Prerrequisitos
 
 - M01-01 completado **o**, como mínimo, tenant trial creado y sesión iniciada en el navegador.

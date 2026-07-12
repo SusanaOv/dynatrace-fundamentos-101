@@ -31,15 +31,14 @@ Instalas kind si falta, creas el clúster, aplicas Operator y DynaKube con los s
 
 ### 1 — Instalar kind (si hace falta)
 
-**Acción:** Si `kind version` falla:
+**Acción:** Ejecuta `kind version`. Si falla, el Codespace debería haberlo instalado en `postCreate`; si no:
 
 ```bash
-curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
-chmod +x ./kind
-sudo mv ./kind /usr/local/bin/kind
+./scripts/setup-codespace.sh
+kind version
 ```
 
-**Por qué:** El Codespace base no siempre incluye kind.
+**Por qué:** kind no siempre viene en la imagen base de Codespaces.
 **Resultado esperado:** `kind version` responde OK.
 
 ### 2 — Crear clúster
@@ -69,9 +68,10 @@ kubectl get nodes
 **Acción:**
 
 ```bash
-sudo apt-get update && sudo apt-get install -y gettext-base   # envsubst
 ./scripts/operator-up.sh
 ```
+
+(Si `envsubst: command not found`, ejecuta `./scripts/setup-codespace.sh` primero.)
 
 **Por qué:** Aplica manifest oficial del Operator y plantilla DynaKube del curso.
 **Resultado esperado:** Pods `dynatrace-operator` y componentes OneAgent/ActiveGate arrancando.
@@ -87,6 +87,14 @@ kubectl -n dynatrace get pods
 
 **Por qué:** Confirma reconciliación antes de desplegar apps.
 **Resultado esperado:** DynaKube **Running**; pods OneAgent/ActiveGate sin CrashLoop prolongado (puede tardar 5–10 min).
+
+Validación local:
+
+```bash
+./scripts/validate-lab.sh m05
+```
+
+(Aviso sobre `lab-web` es normal hasta M05-02.)
 
 ## Comprueba tu entendimiento
 

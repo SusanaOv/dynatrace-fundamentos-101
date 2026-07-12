@@ -16,6 +16,7 @@ Comprobaciones:
 ```bash
 ./scripts/health-check.sh
 ./scripts/oneagent-status.sh
+./scripts/validate-lab.sh       # checkpoint por módulo: m03, m04, m05, all
 ```
 
 ## Servicios (Compose)

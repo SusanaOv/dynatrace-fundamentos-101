@@ -7,6 +7,10 @@
 >
 > **Orden recomendado:** lee la teoría de M02, completa **M03** (OneAgent) y después vuelve a los labs M02-01 y M02-02 con datos reales en Smartscape.
 
+> [!WARNING]
+> **No empieces M02-01 todavía** si acabas de llegar desde M01-02. Este módulo es **teoría primero**;
+> los labs requieren OneAgent conectado (M03-01). Sigue el enlace **Siguiente página →** hacia M03.
+
 ## Qué aprenderás
 
 - Describir arquitectura Dynatrace SaaS y componentes del camino de datos.

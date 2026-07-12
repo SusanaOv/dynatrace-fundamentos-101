@@ -84,6 +84,12 @@ Si falla → [TROUBLESHOOTING](../TROUBLESHOOTING.md#oneagent-no-arranca-o-reini
 | ¿Flask en Services? | Aún no — normal |
 | ¿Siguiente? | M03-02 → M04 (OTel en `api.py`) |
 
+Validación local antes de seguir:
+
+```bash
+./scripts/validate-lab.sh m03
+```
+
 → **[M03-02 — Procesos y bases de datos](M03-02-procesos-bases-datos.md)**
 
 ## Errores frecuentes

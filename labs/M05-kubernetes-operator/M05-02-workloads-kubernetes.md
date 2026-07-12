@@ -79,7 +79,7 @@ Espera 5 min y confirma que Dynatrace muestra 3 pods.
 
 ## Errores frecuentes
 
-| Síntoma | Causa probable | Cóqu arreglarlo |
+| Síntoma | Causa probable | Cómo arreglarlo |
 |---------|----------------|-----------------|
 | Namespace vacío en UI | DynaKube aún no ready | Espera pods dynatrace namespace |
 | Pods lab pending | Recursos kind | `kubectl describe pod` |

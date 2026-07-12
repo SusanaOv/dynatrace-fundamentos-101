@@ -49,14 +49,14 @@ Tras M03 deberías tener:
 
 ## Parte B — Instrumentar demo-api con OpenTelemetry
 
-### Paso 3 — Token ingest
+### Paso 3 — Verificar token ingest (creado en M01-01)
 
 | | |
 |-|-|
-| **Dónde** | Dynatrace → **Access tokens** → **Generate new token** |
-| **Acción** | Nombre `curso-otel-ingest` · scope **`openTelemetryTrace.ingest`** |
+| **Dónde** | `infra/.env` en el Codespace |
+| **Acción** | Confirma que `DYNATRACE_INGEST_TOKEN` **no está vacío** y tiene scope `openTelemetryTrace.ingest` (lo generaste en M01-01 paso 2e). Si lo perdiste, regenera en **Access tokens** con nombre `curso-otel-ingest`. |
 | **Para qué** | Autorizar OTLP desde la app al tenant |
-| **Validar** | Token copiado **sin caracteres extra** al final en `infra/.env` |
+| **Validar** | `source infra/.env && test -n "$DYNATRACE_INGEST_TOKEN" && echo OK` |
 | **Comprender** | **PaaS** = OneAgent · **Ingest** = OTel (tokens distintos) |
 
 ### Paso 4 — Dependencias Python
@@ -127,7 +127,7 @@ _configure_otel()
 | | |
 |-|-|
 | **Dónde** | `infra/docker-compose.yml` → servicio `demo-api` → `environment` |
-| **Acción** | Añade: |
+| **Acción** | **Comprueba** que ya existen (el repo las trae preconfiguradas): |
 
 ```yaml
       DYNATRACE_ENVIRONMENT_URL: ${DYNATRACE_ENVIRONMENT_URL:-}
@@ -136,22 +136,23 @@ _configure_otel()
 ```
 
 | **Para qué** | Pasar tenant y token al contenedor sin commitear secretos |
-| **Validar** | `DATABASE_URL` y `REDIS_URL` siguen presentes |
+| **Validar** | `DATABASE_URL`, `REDIS_URL` y las tres líneas OTel presentes |
 | **Comprender** | `.env` del host → variables del contenedor `demo-api` |
 
-### Paso 7 — Arranque con auto-instrumentación
+### Paso 7 — Dockerfile (sin doble instrumentación)
 
 | | |
 |-|-|
 | **Dónde** | `infra/demo-web/Dockerfile.api` — última línea |
-| **Acción** | Cambia `CMD` a: |
+| **Acción** | **Mantén** (no cambies a `opentelemetry-instrument`): |
 
 ```dockerfile
-CMD ["opentelemetry-instrument", "python", "api.py"]
+CMD ["python", "api.py"]
 ```
 
-| **Para qué** | Wrapper OTel recomendado para Flask en contenedor |
-| **Validar** | `COPY requirements.txt api.py .` en el Dockerfile (no solo `api.py`) |
+| **Para qué** | `_configure_otel()` del paso 5 ya instrumenta Flask/Redis/Postgres |
+| **Validar** | `COPY requirements.txt api.py .` presente; **no** uses `opentelemetry-instrument` junto con el paso 5 (doble instrumentación) |
+| **Comprender** | Wrapper CLI **o** código manual — en este lab usamos **solo** el código manual |
 
 ### Paso 8 — Rebuild y comprobar ingest
 
@@ -240,5 +241,6 @@ Si ingest falla (401): regenera token — ver [TROUBLESHOOTING](../TROUBLESHOOTI
 3. `docker compose ... up -d --build demo-api`
 4. Vista **Spans**, no solo Requests
 5. [TROUBLESHOOTING — OTel](../TROUBLESHOOTING.md#opentelemetry--demo-api-m04)
+6. Último recurso: `./scripts/apply-m04-otel-solution.sh` (ver [labs/solutions/M04/](../solutions/M04/))
 
 </details>

@@ -27,33 +27,53 @@ Añades tiles de métricas clave y guardas el dashboard en tu tenant.
 
 ### 1 — Crear dashboard
 
-**Acción:** Abre **Dashboards** → **Create dashboard**. Nombre sugerido: `Lab Dynatrace Fundamentos`.
-**Por qué:** Centraliza lo que reutilizarás post-curso en tu fork.
-**Resultado esperado:** Dashboard vacío editable.
+| | |
+|-|-|
+| **Dónde** | <kbd>Ctrl</kbd>+<kbd>K</kbd> → **Dashboards** |
+| **Acción** | **Create dashboard** → nombre `Lab Dynatrace Fundamentos` |
+| **Para qué** | Centralizar métricas del lab en una sola vista |
+| **Validar** | Lienzo vacío con botón **Add tile** / **Add chart** |
+| **Comprender** | Un dashboard es operación; un notebook es análisis ad hoc (M06 teoría) |
 
 ### 2 — Tile response time
 
-**Acción:** Añade tile **Service** o **Metric** con response time del servicio demo-api (últimos 30 min).
-**Por qué:** Métrica clave para detectar regresiones como `/slow`.
-**Resultado esperado:** Gráfico con datos si hubo tráfico reciente.
+| | |
+|-|-|
+| **Dónde** | Dashboard → **Add tile** |
+| **Acción** | Tipo **Service** o **Metric** → servicio **`demo-api`** → métrica **Response time** → timeframe **Last 30 minutes** |
+| **Para qué** | Detectar regresiones como `/slow` de M04 |
+| **Validar** | Gráfico con puntos si hubo tráfico reciente (`./scripts/generate-load.sh`) |
+| **Comprender** | Sin tráfico el tile puede estar vacío — no es error del dashboard |
 
 ### 3 — Tile error rate
 
-**Acción:** Añade tile de **failure rate** o conteo de errores HTTP del mismo servicio.
-**Por qué:** Complementa M04-02 (Problems).
-**Resultado esperado:** Pico visible si ejecutaste `/fail` recientemente.
+| | |
+|-|-|
+| **Dónde** | Mismo dashboard → **Add tile** |
+| **Acción** | Métrica **Failure rate** o **HTTP 5xx count** del servicio `demo-api` |
+| **Para qué** | Complementa M04-02 (Problems) |
+| **Validar** | Pico si ejecutaste `/fail` en la última hora |
+| **Comprender** | Correlaciona con Problems pero no lo sustituye |
 
 ### 4 — Tile infra host
 
-**Acción:** Añade tile de CPU o memoria del **host** del Codespace.
-**Por qué:** Correlaciona problemas de app con saturación de VM.
-**Resultado esperado:** Uso de CPU > 0% con lab activo.
+| | |
+|-|-|
+| **Dónde** | **Add tile** → categoría **Infrastructure** / **Host** |
+| **Acción** | Selecciona el **host del Codespace** → métrica **CPU usage** o **Memory used** |
+| **Para qué** | Correlacionar saturación de VM con latencia de app |
+| **Validar** | CPU > 0% con lab activo |
+| **Comprender** | Host = raíz del árbol que viste en M03 |
 
 ### 5 — Guardar y compartir
 
-**Acción:** Guarda el dashboard. Opcional: genera enlace de compartición solo lectura (si tu tenant lo permite).
-**Por qué:** Material reutilizable tras el curso.
-**Resultado esperado:** Dashboard persistente en tu tenant.
+| | |
+|-|-|
+| **Dónde** | Barra superior del dashboard |
+| **Acción** | **Save** · opcional: enlace solo lectura si tu tenant lo permite |
+| **Para qué** | Reutilizar tras el curso en tu fork |
+| **Validar** | Dashboard aparece en la lista **Dashboards** al recargar |
+| **Comprender** | Los dashboards viven en el tenant, no en el repo git |
 
 ## Comprueba tu entendimiento
 

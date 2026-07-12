@@ -1,6 +1,6 @@
 # M03 — OneAgent e infraestructura
 
-[← Página anterior](../M02-arquitectura-smartscape/M02-02-entidades-naming.md) · [Siguiente página →](M03-01-oneagent-compose.md)
+[← Página anterior](../M02-arquitectura-smartscape/README.md) · [Siguiente página →](M03-01-oneagent-compose.md)
 
 > [!NOTE]
 > **Cómo funciona este módulo.** Teoría → laboratorios paso a paso.

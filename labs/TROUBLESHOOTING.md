@@ -121,6 +121,8 @@ Tras contenedor **Up** estable (2–5 min):
 ./scripts/oneagent-down.sh
 ./scripts/oneagent-status.sh
 ./scripts/generate-load.sh
+./scripts/validate-lab.sh          # checkpoint m01|m03|m04|m05|all
+./scripts/apply-m04-otel-solution.sh   # solo si M04 OTel bloqueado
 docker compose -f infra/docker-compose.yml ps
 docker logs -f dynatrace-oneagent
 ```

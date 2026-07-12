@@ -12,6 +12,8 @@ Formación **100 % práctica**: monitorizas aplicaciones reales en un Codespace 
 
 Cada módulo tiene **teoría + demostración** en su README y **laboratorios** (`Mxx-NN`) donde practicas tú paso a paso.
 
+> **Orden de labs:** los labs de **M02** (Smartscape) van **después de M03** (OneAgent), aunque leas la teoría de M02 antes. Ver [labs/README.md](labs/README.md#ruta-del-alumno-orden-real).
+
 Los labs parten de un **starter** (código y scripts en el repo); tú validas en Dynatrace y, en M04, **añades OpenTelemetry** siguiendo las instrucciones. Ver [labs/README.md](labs/README.md).
 
 ## Antes de empezar
@@ -22,6 +24,7 @@ Los labs parten de un **starter** (código y scripts en el repo); tú validas en
 | Tokens del lab (PaaS, Operator, ingest) | M01-01 / M03 / M05 |
 | Infraestructura local del curso | [infra/README.md](infra/README.md) |
 | Problemas frecuentes | [labs/TROUBLESHOOTING.md](labs/TROUBLESHOOTING.md) |
+| Validar entorno (scripts) | `./scripts/validate-lab.sh` (ver [labs/README.md](labs/README.md)) |
 
 ## Módulos
 
