@@ -51,6 +51,8 @@ set +a
 for var in DYNATRACE_ENVIRONMENT_URL DYNATRACE_API_TOKEN DYNATRACE_INGEST_TOKEN; do
   if [[ -z "${!var:-}" ]]; then
     echo "ERROR: $var vacío en infra/.env"
+    echo "  → M01-01 paso 2e: Kubernetes wizard → Generate token (Operator + Ingest)"
+    echo "  → Pega DYNATRACE_API_TOKEN antes de continuar M05"
     exit 1
   fi
 done

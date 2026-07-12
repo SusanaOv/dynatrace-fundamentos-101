@@ -280,6 +280,15 @@ Comprueba el checkpoint M01:
 
 → Debe terminar con **Resultado: OK** (avisos sobre tokens vacíos son normales si aún no los pegaste).
 
+Comprueba que **los tres tokens** están rellenados (evitas parar en M05):
+
+```bash
+set -a && source infra/.env && set +a
+for v in ONEAGENT_PAAS_TOKEN DYNATRACE_API_TOKEN DYNATRACE_INGEST_TOKEN; do
+  test -n "${!v}" && echo "OK $v" || echo "FALTA $v — regenera en M01 paso 2d/2e"
+done
+```
+
 ---
 
 ## Comprueba tu entendimiento
